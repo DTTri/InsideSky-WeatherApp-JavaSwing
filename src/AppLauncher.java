@@ -7,7 +7,8 @@ public class AppLauncher {
           @Override
           public void run()
           {
-              new InsideSky().setVisible(true);
+
+              new InsideSkyGUI().setVisible(true);
           }
       });
     }
