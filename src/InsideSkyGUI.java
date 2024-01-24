@@ -1,11 +1,16 @@
+import org.json.simple.JSONObject;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
 public class InsideSkyGUI extends JFrame {
+    private JSONObject weatherData;
     public InsideSkyGUI(){
         super("InsideSky");
 
@@ -31,14 +36,6 @@ public class InsideSkyGUI extends JFrame {
         searchTextField.setFont(new Font("Dialog", Font.PLAIN, 24));
         add(searchTextField);
 
-        //search Button
-        JButton searchButton = new JButton();
-        searchButton.setBounds(375, 13, 47, 45);
-        searchButton.setIcon(loadImageIcon("src/assets/search.png", searchButton.getWidth(), searchButton.getHeight()));
-        searchButton.setContentAreaFilled(false);
-        searchButton.setBorderPainted(false);
-        searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        add(searchButton);
 
         //weather condition
         JLabel weatherConditionImage = new JLabel();
@@ -79,6 +76,49 @@ public class InsideSkyGUI extends JFrame {
         windspeedText.setBounds(310, 500, 85, 55);
         windspeedText.setFont(new Font("Dialog", Font.PLAIN, 16));
         add(windspeedText);
+
+        //search Button
+        JButton searchButton = new JButton();
+        searchButton.setBounds(375, 13, 47, 45);
+        searchButton.setIcon(loadImageIcon("src/assets/search.png", searchButton.getWidth(), searchButton.getHeight()));
+        searchButton.setContentAreaFilled(false);
+        searchButton.setBorderPainted(false);
+        searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String userInput = searchTextField.getText();
+                if(userInput.replaceAll("\\s", "").length()<=0){
+                    return ;
+                }
+                // update weather info on the screen
+                weatherData = InsideSky.getWeatherData(userInput);
+                String weathercondition = (String)weatherData.get("weather_condition");
+                switch (weathercondition){
+                    case "Clear":
+                        weatherConditionImage.setIcon(loadImageIcon("src/assets/clearWX.png", weatherConditionImage.getWidth(), weatherConditionImage.getHeight()));
+                        break;
+                    case "Cloudy":
+                        weatherConditionImage.setIcon(loadImageIcon("src/assets/cloudyWX.png", weatherConditionImage.getWidth(), weatherConditionImage.getHeight()));
+                        break;
+                    case "Rain":
+                        weatherConditionImage.setIcon(loadImageIcon("src/assets/rainWX.png", weatherConditionImage.getWidth(), weatherConditionImage.getHeight()));
+                        break;
+                    case "Snow":
+                        weatherConditionImage.setIcon(loadImageIcon("src/assets/snowWX.png", weatherConditionImage.getWidth(), weatherConditionImage.getHeight()));
+                        break;
+                }
+
+                weatherConditionDesc.setText(weathercondition);
+                temperatureText.setText(weatherData.get("temperature")+" C");
+                humidityText.setText("<html><b>Humidity</b> "+weatherData.get("humidity")+"%</html>");
+                windspeedText.setText("<html><b>Humidity</b> "+weatherData.get("windspeed")+"km/h</html>");
+
+            }
+        });
+        add(searchButton);
+
     }
 
     private ImageIcon loadImageIcon(String path, int width, int height)

@@ -17,12 +17,12 @@ public class InsideSky {
          JSONArray locationData = getLocationData(locationName);
 
          //extract latitude and longitude data
-         JSONObject location = (JSONObject) locationData.get(0);
+         JSONObject location = (JSONObject) locationData.getFirst();
          double latitude = (double)location.get("latitude");
          double longitude = (double)location.get("longitude");
 
          // build API request URL with location coordinates
-         String urlString="https://api.open-meteo.com/v1/forecast?latitude="+latitude+"&longitude="+longitude+"&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=Asia%2FBangkok";
+         String urlString="https://api.open-meteo.com/v1/forecast?latitude="+latitude+"&longitude="+longitude+"&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto";
          try{
              HttpURLConnection conn = fetchApiResponse(urlString);
 
@@ -48,10 +48,38 @@ public class InsideSky {
 
                  JSONObject hourly = (JSONObject) resultJsonObj.get("hourly");
 
+                 // get index by time
                  JSONArray time = (JSONArray) hourly.get("time");
                  int index= findIndexOfCurrentTime(time);
+
+                 // get temperature by index
+                 JSONArray temperatureData = (JSONArray) hourly.get("temperature_2m");
+                 double temperature = (double)temperatureData.get(index);
+
+                 //get weather code by index
+                 JSONArray weathercode = (JSONArray) hourly.get("weather_code");
+                 String weatherCondition = convertWeatherCode((long) weathercode.get(index));
+
+                 //get humidity by index
+                 JSONArray relativeHumidity = (JSONArray) hourly.get("relative_humidity_2m");
+                 long humidity = (long) relativeHumidity.get(index);
+
+                 //get windspeed by index
+                 JSONArray windspeedData = (JSONArray) hourly.get("wind_speed_10m");
+                 double windspeed = (double) windspeedData.get(index);
+
+                 // summarize weather data
+                 JSONObject weatherData = new JSONObject();
+                 weatherData.put("temperature", temperature);
+                 weatherData.put("weather_condition", weatherCondition);
+                 weatherData.put("humidity", humidity);
+                 weatherData.put("windspeed", windspeed);
+                 return weatherData;
+
+
              }
          }catch(Exception e){
+             System.out.println("InsideSky 82");
              e.printStackTrace();
          }
 
@@ -110,6 +138,8 @@ public class InsideSky {
             return conn;
         }catch(IOException e)
         {
+            // khong tim thay location nay/ khong the openConnection
+
             e.printStackTrace();
         }
         return null;
@@ -117,6 +147,13 @@ public class InsideSky {
 
     private static int findIndexOfCurrentTime(JSONArray timeList){
         String currentTime = getCurrentTime();
+        for(int i=0; i<timeList.size(); i++)
+        {
+            String time = (String) timeList.get(i);
+            if(time.equalsIgnoreCase(currentTime)){
+                return i;
+            }
+        }
         return 0;
     }
 
@@ -129,5 +166,27 @@ public class InsideSky {
         String formattedDateTime = currentDateTime.format(formatter);
 
         return formattedDateTime;
+    }
+
+    private static String convertWeatherCode(long weathercode)
+    {
+        String weatherCondition = "";
+        if(weathercode == 0L){
+            // clear
+            weatherCondition = "Clear";
+        }else if(weathercode <= 3L){
+            // cloudy
+            weatherCondition = "Cloudy";
+        }else if((weathercode >= 51L && weathercode <= 67L)
+                || (weathercode >= 80L && weathercode <= 99L)){
+            // rain
+            weatherCondition = "Rain";
+        }else if(weathercode >= 71L && weathercode <= 77L){
+            // snow
+            weatherCondition = "Snow";
+        }
+
+        return weatherCondition;
+
     }
 }
