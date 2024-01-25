@@ -22,7 +22,7 @@ public class InsideSky {
          double longitude = (double)location.get("longitude");
 
          // build API request URL with location coordinates
-         String urlString="https://api.open-meteo.com/v1/forecast?latitude="+latitude+"&longitude="+longitude+"&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto";
+         String urlString="https://api.open-meteo.com/v1/forecast?latitude="+latitude+"&longitude="+longitude+"&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=Asia%2FBangkok";
          try{
              HttpURLConnection conn = fetchApiResponse(urlString);
 
@@ -79,7 +79,6 @@ public class InsideSky {
 
              }
          }catch(Exception e){
-             System.out.println("InsideSky 82");
              e.printStackTrace();
          }
 

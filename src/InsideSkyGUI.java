@@ -2,6 +2,7 @@ import org.json.simple.JSONObject;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,10 +15,11 @@ public class InsideSkyGUI extends JFrame {
     public InsideSkyGUI(){
         super("InsideSky");
 
+        setContentPane(new BackgroundPanel(27, 27, 30));
+        setIconImage((loadImageIcon("src/assets/logo.png", 0, 0).getImage()));
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         //getContentPane().setBackground(Color.BLACK);
         setSize(450, 650);
-
         // load the gui at the center of the screen
         setLocationRelativeTo(null);
 
@@ -34,6 +36,8 @@ public class InsideSkyGUI extends JFrame {
         JTextField searchTextField = new JTextField();
         searchTextField.setBounds(15, 15, 351, 45);
         searchTextField.setFont(new Font("Dialog", Font.PLAIN, 24));
+        searchTextField.setBackground(new Color(88, 164, 176));
+
         add(searchTextField);
 
 
@@ -47,10 +51,12 @@ public class InsideSkyGUI extends JFrame {
         JLabel temperatureText= new JLabel("10 C");
         temperatureText.setBounds(0, 350, 450, 54);
         temperatureText.setFont(new Font("Dialog", Font.BOLD, 48));
+        temperatureText.setForeground(Color.WHITE);
         temperatureText.setHorizontalAlignment(SwingConstants.CENTER);
         add(temperatureText);
         // description
         JLabel weatherConditionDesc = new JLabel("Cloudy");
+        weatherConditionDesc.setForeground(Color.WHITE);
         weatherConditionDesc.setBounds(0, 405, 450, 36);
         weatherConditionDesc.setFont(new Font("Dialog", Font.PLAIN, 32));
         weatherConditionDesc.setHorizontalAlignment(SwingConstants.CENTER);
@@ -62,6 +68,7 @@ public class InsideSkyGUI extends JFrame {
         add(humidityImage);
 
         JLabel humidityText = new JLabel("<html><b>Humidity</b> 100%</html>");
+        humidityText.setForeground(Color.WHITE);
         humidityText.setBounds(90, 500, 85, 55);
         humidityText.setFont(new Font("Dialog", Font.PLAIN, 16));
         add(humidityText);
@@ -73,6 +80,7 @@ public class InsideSkyGUI extends JFrame {
         add(windspeedImage);
 
         JLabel windspeedText = new JLabel("<html><b>Windspeed</b> 15km/h</html>");
+        windspeedText.setForeground(Color.WHITE);
         windspeedText.setBounds(310, 500, 85, 55);
         windspeedText.setFont(new Font("Dialog", Font.PLAIN, 16));
         add(windspeedText);
@@ -84,7 +92,6 @@ public class InsideSkyGUI extends JFrame {
         searchButton.setContentAreaFilled(false);
         searchButton.setBorderPainted(false);
         searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -98,6 +105,8 @@ public class InsideSkyGUI extends JFrame {
                 switch (weathercondition){
                     case "Clear":
                         weatherConditionImage.setIcon(loadImageIcon("src/assets/clearWX.png", weatherConditionImage.getWidth(), weatherConditionImage.getHeight()));
+                        System.out.println("clear");
+
                         break;
                     case "Cloudy":
                         weatherConditionImage.setIcon(loadImageIcon("src/assets/cloudyWX.png", weatherConditionImage.getWidth(), weatherConditionImage.getHeight()));
@@ -123,15 +132,27 @@ public class InsideSkyGUI extends JFrame {
 
     private ImageIcon loadImageIcon(String path, int width, int height)
     {
-        try{
-            BufferedImage img = ImageIO.read(new File(path));
-
+        Image img = Toolkit.getDefaultToolkit().getImage(path);
+        if(img!=null) {
+            if (width == 0 && height == 0) return new ImageIcon(img);
             return new ImageIcon(img.getScaledInstance(width, height, Image.SCALE_SMOOTH));
         }
-        catch(IOException e){
-           e.printStackTrace();
-    }
         System.out.println("Could not find resource");
         return null;
     }
+}
+class BackgroundPanel extends  JPanel{
+    private int red, green ,blue;
+    public BackgroundPanel(int red, int green, int blue){
+        this.red = red;
+        this.green = green;
+        this.blue = blue;
+    }
+    @Override
+    protected  void paintComponent(Graphics g){
+        super.paintComponent(g);
+        g.setColor(new Color(red, green, blue));
+        g.fillRect(0, 0, getWidth(), getHeight());
+    }
+
 }
